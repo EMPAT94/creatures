@@ -10,25 +10,34 @@ let droppingCollections = [];
 const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGHT = 500;
 
-const getRandX = () => Math.random() * CANVAS_WIDTH;
-const getRandY = () => Math.random() * CANVAS_HEIGHT;
+const getRandX = () => Math.floor(Math.random() * CANVAS_WIDTH);
+const getRandY = () => Math.floor(Math.random() * CANVAS_HEIGHT);
 const getRand10 = () => Math.random() * 10;
+const getRandBool = () => Math.random() < 0.5;
 
-const getNextPos = (oldX, oldY, moveRate) => {
+function setNewPos() {
 
-  const signX = Math.random() < 0.5 ? 1 : -1;
-  const signY = Math.random() < 0.5 ? 1 : -1;
+  this.dir = this.dir || {};
 
-  let newX = oldX + (signX * moveRate);
-  let newY = oldY + (signY * moveRate);
-
-  if (newX >= CANVAS_WIDTH || newX <= 0 || newY >= CANVAS_HEIGHT || newY <= 0) {
-    return ({ newX: oldX, newY: oldY });
-  } else {
-    return ({ newX, newY });
+  if (this.x <= 0) this.dir.x = 1;
+  else if (this.x >= CANVAS_WIDTH) this.dir.x = -1;
+  else if (!this.dir.x) {
+    if (getRandBool()) this.dir.x = 1;
+    else this.dir.x = -1;
   }
 
+  if (this.y <= 0) this.dir.y = 1;
+  else if (this.y >= CANVAS_HEIGHT) this.dir.y = -1;
+  else if (!this.dir.y) {
+    if (getRandBool()) this.dir.y = 1;
+    else this.dir.y = -1;
+  }
+
+  if (this.dir.x) this.x = this.x + this.dir.x * this.moveRate;
+  if (this.dir.y) this.y = this.y + this.dir.y * this.moveRate;
+
 }
+
 
 const detectCollision = ({ x, y, size }, arr) => {
   for (let i = 0; i < arr.length; i++) {
@@ -52,9 +61,9 @@ class Being { // All creatures and plants
     this.y = y;
     this.size = size;
     this.growthRate = growthRate;
-    this.lifeLeft = lifeLeft;
     this.aliveColor = aliveColor;
     this.deadColor = deadColor;
+    this.maxSize = maxSize;
   }
 
   birth() {
@@ -90,10 +99,7 @@ class Being { // All creatures and plants
 class Plant extends Being {
 
   age() {
-    this.lifeLeft -= 1;
-    if (this.lifeLeft < getRand10()) this.die();
-    else if (this.size < this.maxSize) this.grow();
-    else return;
+    if (this.size < this.maxSize) this.grow();
   }
 
 }
@@ -104,20 +110,23 @@ class Creature extends Being {
     super(config);
     this.moveRate = config.moveRate;
     this.food = config.food;
+    this.lifeLeft = config.lifeLeft;
   }
 
   age() {
     this.lifeLeft -= 1;
+
     if (this.lifeLeft < getRand10()) this.die();
-    else this.grow();
+    else if (this.size < this.maxSize) this.grow();
+    else return;
+
   }
 
   move() {
     this.clear();
     ctx.stroke();
 
-    let { newX, newY } = getNextPos(this.x, this.y, this.moveRate);
-    this.x = newX; this.y = newY;
+    setNewPos.call(this);
     ctx.fillStyle = this.aliveColor;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, true);
@@ -144,7 +153,7 @@ class Moss extends Plant {
 
   constructor(x, y) {
     super({
-      x, y, size: 0.1, growthRate: 0.1, lifeLeft: 50,
+      x, y, size: 0.1, growthRate: 0.1,
       aliveColor: "green", deadColor: "black", maxSize: 10
     });
   }
@@ -170,18 +179,18 @@ function ageAll() {
   mossCollection.forEach((moss, i) => {
     if (moss.isDead) {
       mossCollection.splice(i, 1);
-      return;
-    };
-    moss.age()
+    } else {
+      moss.age();
+    }
   });
 
   emonoCollection.forEach((emono, i) => {
     if (emono.isDead) {
       emonoCollection.splice(i, 1);
-      return;
-    };
-    emono.move();
-    emono.age();
+    } else {
+      emono.move();
+      emono.age();
+    }
   });
 
 }
@@ -198,7 +207,7 @@ function populate() {
   const canvas = document.getElementById("environment");
   ctx = canvas.getContext("2d");
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 300; i++) {
 
     let moss = new Moss(getRandX(), getRandY());
     mossCollection.push(moss);
@@ -215,17 +224,14 @@ function populate() {
 }
 
 function germinateDroppings() {
-  droppingCollections.forEach(drop => {
-    let moss = new Moss(drop.x, drop.y);
-    mossCollection.push(moss);
-    moss.birth();
+  droppingCollections.forEach((drop, i) => {
+    if (getRandBool()) {
+      let moss = new Moss(drop.x, drop.y);
+      mossCollection.push(moss);
+      moss.birth();
+    }
+    droppingCollections.splice(i, 1);
   });
-}
-
-function redraw() {
-  ctx.save();
-  ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  ctx.restore();
 }
 
 /* simulation */
@@ -239,23 +245,23 @@ window.onload = e => {
 
   // Start timeline
   years = 0;
-  let timeline = setInterval(() => {
+
+  function updateEnvironment() {
 
     years += 10;
 
     let str = checkDead();
     if (str) {
       alert("Year " + years + " - " + str);
-      clearInterval(timeline);
       return;
     }
 
     ageAll();
-
     germinateDroppings();
 
-    if (years % 1000 === 0) redraw();
+    window.requestAnimationFrame(updateEnvironment);
+  }
 
-  }, 500);
+  window.requestAnimationFrame(updateEnvironment);
 
 };
