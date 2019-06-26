@@ -7,37 +7,16 @@ let mossCollection = [];
 let emonoCollection = [];
 let droppingCollections = [];
 
-const CANVAS_WIDTH = 1000;
-const CANVAS_HEIGHT = 500;
+let CANVAS_WIDTH = 1000;
+let CANVAS_HEIGHT = 500;
 
 const getRandX = () => Math.floor(Math.random() * CANVAS_WIDTH);
 const getRandY = () => Math.floor(Math.random() * CANVAS_HEIGHT);
 const getRand10 = () => Math.random() * 10;
-const getRandBool = () => Math.random() < 0.5;
 
-function setNewPos() {
-
-  this.dir = this.dir || {};
-
-  if (this.x <= 0) this.dir.x = 1;
-  else if (this.x >= CANVAS_WIDTH) this.dir.x = -1;
-  else if (!this.dir.x) {
-    if (getRandBool()) this.dir.x = 1;
-    else this.dir.x = -1;
-  }
-
-  if (this.y <= 0) this.dir.y = 1;
-  else if (this.y >= CANVAS_HEIGHT) this.dir.y = -1;
-  else if (!this.dir.y) {
-    if (getRandBool()) this.dir.y = 1;
-    else this.dir.y = -1;
-  }
-
-  if (this.dir.x) this.x = this.x + this.dir.x * this.moveRate;
-  if (this.dir.y) this.y = this.y + this.dir.y * this.moveRate;
-
-}
-
+const getEqualChance = () => Math.random() < 0.5;
+const getFrequentChance = () => Math.random() < 0.7;
+const getRareChance = () => Math.random() < 0.1;
 
 const detectCollision = ({ x, y, size }, arr) => {
   for (let i = 0; i < arr.length; i++) {
@@ -47,6 +26,35 @@ const detectCollision = ({ x, y, size }, arr) => {
     let dst = Math.sqrt(dstX * dstX + dstY * dstY);
     if (dst < (a.size + size)) return a;
   }
+}
+
+function setNewPos() {
+
+  this.dir = this.dir || {};
+
+  if (this.x <= 0) this.dir.x = 1;
+  else if (this.x >= CANVAS_WIDTH) this.dir.x = -1;
+  else if (!this.dir.x) {
+    if (getEqualChance()) this.dir.x = 1;
+    else this.dir.x = -1;
+  }
+
+  if (this.y <= 0) this.dir.y = 1;
+  else if (this.y >= CANVAS_HEIGHT) this.dir.y = -1;
+  else if (!this.dir.y) {
+    if (getEqualChance()) this.dir.y = 1;
+    else this.dir.y = -1;
+  }
+
+  if (this.dir.x) {
+    if (getRareChance()) this.dir.x *= -1;
+    this.x += this.dir.x * this.moveRate;
+  }
+  if (this.dir.y) {
+    if (getRareChance()) this.dir.y *= -1;
+    this.y += this.dir.y * this.moveRate;
+  }
+
 }
 
 /* entities */
@@ -115,10 +123,20 @@ class Creature extends Being {
 
   age() {
     this.lifeLeft -= 1;
-
     if (this.lifeLeft < getRand10()) this.die();
     else if (this.size < this.maxSize) this.grow();
-    else return;
+    else if (!this.hasReproduced) this.reproduce();
+  }
+
+  reproduce() {
+    this.hasReproduced = true;
+    let numChild = getRand10();
+
+    for (let i = 0; i < numChild; i++) {
+      let emono = new Emono(this.x, this.y);
+      emonoCollection.push(emono);
+      emono.birth();
+    }
 
   }
 
@@ -204,8 +222,6 @@ function checkDead() {
 }
 
 function populate() {
-  const canvas = document.getElementById("environment");
-  ctx = canvas.getContext("2d");
 
   for (let i = 0; i < 300; i++) {
 
@@ -213,7 +229,7 @@ function populate() {
     mossCollection.push(moss);
     moss.birth();
 
-    if (i < 50) {
+    if (i < 1) {
       let emono = new Emono(getRandX(), getRandY());
       emonoCollection.push(emono);
       emono.birth();
@@ -225,7 +241,7 @@ function populate() {
 
 function germinateDroppings() {
   droppingCollections.forEach((drop, i) => {
-    if (getRandBool()) {
+    if (getFrequentChance()) {
       let moss = new Moss(drop.x, drop.y);
       mossCollection.push(moss);
       moss.birth();
@@ -237,6 +253,9 @@ function germinateDroppings() {
 /* simulation */
 
 window.onload = e => {
+
+  const canvas = document.getElementById("environment");
+  ctx = canvas.getContext("2d");
 
   // Onload (get user inputs)
 
