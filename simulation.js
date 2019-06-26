@@ -5,6 +5,7 @@ let years;
 
 let mossCollection = [];
 let emonoCollection = [];
+let jeagerCollection = [];
 let droppingCollections = [];
 
 let CANVAS_WIDTH = 1000;
@@ -13,6 +14,7 @@ let CANVAS_HEIGHT = 500;
 const getRandX = () => Math.floor(Math.random() * CANVAS_WIDTH);
 const getRandY = () => Math.floor(Math.random() * CANVAS_HEIGHT);
 const getRand10 = () => Math.random() * 10;
+const getRand5 = () => (Math.random() * 10) % 5;
 
 const getEqualChance = () => Math.random() < 0.5;
 const getFrequentChance = () => Math.random() < 0.7;
@@ -128,18 +130,6 @@ class Creature extends Being {
     else if (!this.hasReproduced) this.reproduce();
   }
 
-  reproduce() {
-    this.hasReproduced = true;
-    let numChild = getRand10();
-
-    for (let i = 0; i < numChild; i++) {
-      let emono = new Emono(this.x, this.y);
-      emonoCollection.push(emono);
-      emono.birth();
-    }
-
-  }
-
   move() {
     this.clear();
     ctx.stroke();
@@ -188,6 +178,43 @@ class Emono extends Creature {
     });
   }
 
+  reproduce() {
+    this.hasReproduced = true;
+    let numChild = getRand5();
+
+    for (let i = 0; i < numChild; i++) {
+      let emono = new Emono(this.x, this.y);
+      emonoCollection.push(emono);
+      emono.birth();
+    }
+
+  }
+
+}
+
+class Jeager extends Creature {
+
+  constructor(x, y) {
+    super({
+      x, y, size: 0.5, growthRate: 0.03, lifeLeft: 500,
+      aliveColor: "red", deadColor: "black", moveRate: 3,
+      food: emonoCollection, maxSize: 10
+    });
+  }
+
+  reproduce() {
+    this.hasReproduced = true;
+    let numChild = 2;
+    if (getEqualChance()) numChild = 3;
+
+    for (let i = 0; i < numChild; i++) {
+      let jeager = new Jeager(this.x, this.y);
+      jeagerCollection.push(jeager);
+      jeager.birth();
+    }
+
+  }
+
 }
 
 /* helper functions */
@@ -211,14 +238,20 @@ function ageAll() {
     }
   });
 
+  jeagerCollection.forEach((jeager, i) => {
+    if (jeager.isDead) {
+      jeagerCollection.splice(i, 1);
+    } else {
+      jeager.move();
+      jeager.age();
+    }
+  });
+
 }
 
 function checkDead() {
-
-  // If all emonos are dead
   if (emonoCollection.length === 0) return "All Emonos are dead!";
-
-
+  if (jeagerCollection.length === 0) return "All Jeagers are dead!";
 }
 
 function populate() {
@@ -229,10 +262,16 @@ function populate() {
     mossCollection.push(moss);
     moss.birth();
 
-    if (i < 1) {
+    if (i < 100) {
       let emono = new Emono(getRandX(), getRandY());
       emonoCollection.push(emono);
       emono.birth();
+    }
+
+    if (i < 20) {
+      let jeager = new Jeager(getRandX(), getRandY());
+      jeagerCollection.push(jeager);
+      jeager.birth();
     }
 
   }
