@@ -1,3 +1,5 @@
+"use strict";
+
 /* globals */
 
 let ctx;
@@ -125,9 +127,13 @@ class Creature extends Being {
 
   age() {
     this.lifeLeft -= 1;
+
+    if (this.lifeLeft < 30) this.aliveColor = "grey";
+
     if (this.lifeLeft < getRand10()) this.die();
     else if (this.size < this.maxSize) this.grow();
     else if (!this.hasReproduced) this.reproduce();
+
   }
 
   move() {
@@ -161,7 +167,7 @@ class Moss extends Plant {
 
   constructor(x, y) {
     super({
-      x, y, size: 0.1, growthRate: 0.1,
+      x, y, size: 0.1, growthRate: 0.08,
       aliveColor: "green", deadColor: "black", maxSize: 10
     });
   }
@@ -196,16 +202,16 @@ class Jeager extends Creature {
 
   constructor(x, y) {
     super({
-      x, y, size: 0.5, growthRate: 0.03, lifeLeft: 500,
+      x, y, size: 0.5, growthRate: 0.03, lifeLeft: 250,
       aliveColor: "red", deadColor: "black", moveRate: 3,
-      food: emonoCollection, maxSize: 10
+      food: emonoCollection, maxSize: 8
     });
   }
 
   reproduce() {
     this.hasReproduced = true;
-    let numChild = 2;
-    if (getEqualChance()) numChild = 3;
+    let numChild = 1;
+    if (getEqualChance()) numChild = 2;
 
     for (let i = 0; i < numChild; i++) {
       let jeager = new Jeager(this.x, this.y);
@@ -256,24 +262,30 @@ function checkDead() {
 
 function populate() {
 
-  for (let i = 0; i < 300; i++) {
+  let num_moss = prompt("Number of mosses");
+  let num_emono = prompt("Number of emonos");
+  let num_jeager = prompt("Number of jeagers");
 
+  if (num_moss > 500 || num_moss > 500 || num_jeager > 500) {
+    return alert("Number must be less than 500");
+  }
+
+  for (let i = 0; i < num_moss; i++) {
     let moss = new Moss(getRandX(), getRandY());
     mossCollection.push(moss);
     moss.birth();
+  }
 
-    if (i < 100) {
-      let emono = new Emono(getRandX(), getRandY());
-      emonoCollection.push(emono);
-      emono.birth();
-    }
+  for (let i = 0; i < num_emono; i++) {
+    let emono = new Emono(getRandX(), getRandY());
+    emonoCollection.push(emono);
+    emono.birth();
+  }
 
-    if (i < 20) {
-      let jeager = new Jeager(getRandX(), getRandY());
-      jeagerCollection.push(jeager);
-      jeager.birth();
-    }
-
+  for (let i = 0; i < num_jeager; i++) {
+    let jeager = new Jeager(getRandX(), getRandY());
+    jeagerCollection.push(jeager);
+    jeager.birth();
   }
 
 }
@@ -284,6 +296,15 @@ function germinateDroppings() {
       let moss = new Moss(drop.x, drop.y);
       mossCollection.push(moss);
       moss.birth();
+
+      if (getRareChance()) {
+        // TODO: Add Musk here
+        let moss = new Moss(drop.x, drop.y);
+        moss.moveRate = 5;
+        setNewPos.call(moss);
+        mossCollection.push(moss);
+        moss.birth();
+      }
     }
     droppingCollections.splice(i, 1);
   });
@@ -296,9 +317,7 @@ window.onload = e => {
   const canvas = document.getElementById("environment");
   ctx = canvas.getContext("2d");
 
-  // Onload (get user inputs)
-
-  // Init (populate environment)
+  // Init 
   populate();
 
   // Start timeline
@@ -318,6 +337,7 @@ window.onload = e => {
     germinateDroppings();
 
     window.requestAnimationFrame(updateEnvironment);
+
   }
 
   window.requestAnimationFrame(updateEnvironment);
