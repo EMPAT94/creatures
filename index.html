@@ -15,17 +15,82 @@
       margin: 0;
       padding: 0;
       background-color: black;
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    div#instructions {
+      position: "absolute";
+      max-width: 100%;
+      max-height: 100%;
+      padding: 2% 5%;
+      line-height: 1.5;
+      letter-spacing: 3px;
     }
 
     canvas#environment {
       width: 100vw;
       height: 100vh;
     }
+
+    input {
+      border-radius: 5px;
+      padding: 3px;
+      border: 1px solid grey;
+    }
+
+    button {
+      padding: 15px;
+      background-color: grey;
+      color: white;
+      border-color: black;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: darkgrey;
+    }
   </style>
 
-  <canvas id="environment" width="1000" height="500"></canvas>
+  <div id="instructions">
 
-  <script type="text/javascript" src="./simulation.js" ></script>
+    <h1>Creatures</h1>
+
+    <h3>A simulation where different creatures interact with the surroundings and each other</h3>
+
+    <h2>Environment</h2>
+
+    <ul>
+      <li> Environment is made up of Plants (<span style="color:greenyellow">Moss</span>,
+        <span style="color:olivedrab">Musk</span>) and Creatures (<span style="color:red">Jeager</span>,
+        <span style="color:blue">Emono</span>)</li>
+      <li> Jeagers feed on Emonos, Emonos feed on Plants, Plants germinate in Creatures' droppings</li>
+      <li> Musk is extremely nutritive but grows only where there is a high density of droppings</li>
+      <li> Upon reaching a certain size, Creatures reproduce</li>
+      <li> All Creatures and Plants evolve</li>
+      <li> Creatures will die if not fed for certain amount of time</li>
+      <li> Creatures will die when they get old</li>
+    </ul>
+
+    <h2>Objective</h2>
+
+    <h3>To create a sustainable pace of evolution given a configurable initial state
+      - you win if your creatures survive over 20,000 years</h3>
+
+    <h2>Instructions</h2>
+
+    <ol>
+      <li>Enter initial number of Mosses - <input id="num_moss" type="number" max="500"> </li>
+      <li>Enter initial number of Emonos - <input id="num_emono" type="number" max="500"></li>
+      <li>Enter initial number of Jeagers - <input id="num_jeager" type="number" max="500"></li>
+    </ol>
+    <button onclick="populate()">SUBMIT</button>
+
+  </div>
+
+  <canvas id="environment" width="1000" height="500" hidden></canvas>
+
+  <script type="text/javascript" src="./simulation.js"></script>
 
 </body>
 

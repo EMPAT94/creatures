@@ -3,7 +3,7 @@
 /* globals */
 
 let ctx;
-let years;
+let years = 0;
 
 let mossCollection = [];
 let emonoCollection = [];
@@ -262,13 +262,18 @@ function checkDead() {
 
 function populate() {
 
-  let num_moss = prompt("Number of mosses");
-  let num_emono = prompt("Number of emonos");
-  let num_jeager = prompt("Number of jeagers");
+  const num_moss = document.getElementById("num_moss").value;
+  const num_emono = document.getElementById("num_emono").value;
+  const num_jeager = document.getElementById("num_jeager").value;
 
   if (num_moss > 500 || num_moss > 500 || num_jeager > 500) {
     return alert("Number must be less than 500");
   }
+
+  document.getElementById("instructions").hidden = true;
+  document.getElementById("environment").hidden = false;
+
+  ctx = document.getElementById("environment").getContext("2d");
 
   for (let i = 0; i < num_moss; i++) {
     let moss = new Moss(getRandX(), getRandY());
@@ -287,6 +292,8 @@ function populate() {
     jeagerCollection.push(jeager);
     jeager.birth();
   }
+
+  window.requestAnimationFrame(updateEnvironment);
 
 }
 
@@ -310,36 +317,25 @@ function germinateDroppings() {
   });
 }
 
-/* simulation */
+function updateEnvironment() {
 
-window.onload = e => {
+  years += 10;
 
-  const canvas = document.getElementById("environment");
-  ctx = canvas.getContext("2d");
-
-  // Init 
-  populate();
-
-  // Start timeline
-  years = 0;
-
-  function updateEnvironment() {
-
-    years += 10;
-
-    let str = checkDead();
-    if (str) {
-      alert("Year " + years + " - " + str);
-      return;
-    }
-
-    ageAll();
-    germinateDroppings();
-
-    window.requestAnimationFrame(updateEnvironment);
-
+  let str = checkDead();
+  if (str) {
+    alert("Year " + years + " - " + str);
+    return;
   }
+
+  if (years >= 20000) {
+    alert("Year 20000 - You win!");
+    return;
+  }
+
+  ageAll();
+  germinateDroppings();
 
   window.requestAnimationFrame(updateEnvironment);
 
-};
+}
+
