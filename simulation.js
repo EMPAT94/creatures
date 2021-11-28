@@ -1,5 +1,3 @@
-"use strict";
-
 /* globals */
 
 let ctx;
@@ -10,8 +8,8 @@ let emonoCollection = [];
 let jeagerCollection = [];
 let droppingCollections = [];
 
-let CANVAS_WIDTH = 1000;
-let CANVAS_HEIGHT = 500;
+let CANVAS_WIDTH = window.innerWidth;
+let CANVAS_HEIGHT = window.innerHeight;
 
 const getRandX = () => Math.floor(Math.random() * CANVAS_WIDTH);
 const getRandY = () => Math.floor(Math.random() * CANVAS_HEIGHT);
@@ -28,46 +26,51 @@ const detectCollision = ({ x, y, size }, arr) => {
     let dstX = a.x - x;
     let dstY = a.y - y;
     let dst = Math.sqrt(dstX * dstX + dstY * dstY);
-    if (dst < (a.size + size)) return a;
+    if (dst < a.size + size) return a;
   }
-}
+};
 
-function setNewPos() {
+function setNewPos(being) {
+  being.dir = being.dir || {};
 
-  this.dir = this.dir || {};
-
-  if (this.x <= 0) this.dir.x = 1;
-  else if (this.x >= CANVAS_WIDTH) this.dir.x = -1;
-  else if (!this.dir.x) {
-    if (getEqualChance()) this.dir.x = 1;
-    else this.dir.x = -1;
-  }
-
-  if (this.y <= 0) this.dir.y = 1;
-  else if (this.y >= CANVAS_HEIGHT) this.dir.y = -1;
-  else if (!this.dir.y) {
-    if (getEqualChance()) this.dir.y = 1;
-    else this.dir.y = -1;
+  if (being.x <= 0) being.dir.x = 1;
+  else if (being.x >= CANVAS_WIDTH) being.dir.x = -1;
+  else if (!being.dir.x) {
+    if (getEqualChance()) being.dir.x = 1;
+    else being.dir.x = -1;
   }
 
-  if (this.dir.x) {
-    if (getRareChance()) this.dir.x *= -1;
-    this.x += this.dir.x * this.moveRate;
-  }
-  if (this.dir.y) {
-    if (getRareChance()) this.dir.y *= -1;
-    this.y += this.dir.y * this.moveRate;
+  if (being.y <= 0) being.dir.y = 1;
+  else if (being.y >= CANVAS_HEIGHT) being.dir.y = -1;
+  else if (!being.dir.y) {
+    if (getEqualChance()) being.dir.y = 1;
+    else being.dir.y = -1;
   }
 
+  if (being.dir.x) {
+    if (getRareChance()) being.dir.x *= -1;
+    being.x += being.dir.x * being.moveRate;
+  }
+  if (being.dir.y) {
+    if (getRareChance()) being.dir.y *= -1;
+    being.y += being.dir.y * being.moveRate;
+  }
 }
 
 /* entities */
 
-class Being { // All creatures and plants
+class Being {
+  // All creatures and plants
 
   constructor({
-    x, y, size, growthRate, maxSize,
-    lifeLeft, aliveColor, deadColor
+    x,
+    y,
+    size,
+    growthRate,
+    maxSize,
+    lifeLeft,
+    aliveColor,
+    deadColor,
   }) {
     this.x = x;
     this.y = y;
@@ -105,19 +108,15 @@ class Being { // All creatures and plants
     this.clear();
     ctx.stroke();
   }
-
 }
 
 class Plant extends Being {
-
   age() {
     if (this.size < this.maxSize) this.grow();
   }
-
 }
 
 class Creature extends Being {
-
   constructor(config) {
     super(config);
     this.moveRate = config.moveRate;
@@ -133,14 +132,13 @@ class Creature extends Being {
     if (this.lifeLeft < getRand10()) this.die();
     else if (this.size < this.maxSize) this.grow();
     else if (!this.hasReproduced) this.reproduce();
-
   }
 
   move() {
     this.clear();
     ctx.stroke();
 
-    setNewPos.call(this);
+    setNewPos(this);
     ctx.fillStyle = this.aliveColor;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, true);
@@ -160,27 +158,35 @@ class Creature extends Being {
   leaveDroppings() {
     droppingCollections.push({ x: this.x, y: this.y, size: this.size });
   }
-
 }
 
 class Moss extends Plant {
-
   constructor(x, y) {
     super({
-      x, y, size: 0.1, growthRate: 0.08,
-      aliveColor: "green", deadColor: "black", maxSize: 10
+      x,
+      y,
+      size: 0.1,
+      growthRate: 0.08,
+      aliveColor: "green",
+      deadColor: "black",
+      maxSize: 10,
     });
   }
-
 }
 
 class Emono extends Creature {
-
   constructor(x, y) {
     super({
-      x, y, size: 0.1, growthRate: 0.05, lifeLeft: 100,
-      aliveColor: "blue", deadColor: "black", moveRate: 5,
-      food: mossCollection, maxSize: 5
+      x,
+      y,
+      size: 0.1,
+      growthRate: 0.05,
+      lifeLeft: 100,
+      aliveColor: "blue",
+      deadColor: "black",
+      moveRate: 5,
+      food: mossCollection,
+      maxSize: 5,
     });
   }
 
@@ -193,18 +199,22 @@ class Emono extends Creature {
       emonoCollection.push(emono);
       emono.birth();
     }
-
   }
-
 }
 
 class Jeager extends Creature {
-
   constructor(x, y) {
     super({
-      x, y, size: 0.5, growthRate: 0.03, lifeLeft: 250,
-      aliveColor: "red", deadColor: "black", moveRate: 3,
-      food: emonoCollection, maxSize: 8
+      x,
+      y,
+      size: 0.5,
+      growthRate: 0.03,
+      lifeLeft: 250,
+      aliveColor: "red",
+      deadColor: "black",
+      moveRate: 3,
+      food: emonoCollection,
+      maxSize: 8,
     });
   }
 
@@ -218,15 +228,12 @@ class Jeager extends Creature {
       jeagerCollection.push(jeager);
       jeager.birth();
     }
-
   }
-
 }
 
 /* helper functions */
 
 function ageAll() {
-
   mossCollection.forEach((moss, i) => {
     if (moss.isDead) {
       mossCollection.splice(i, 1);
@@ -252,7 +259,6 @@ function ageAll() {
       jeager.age();
     }
   });
-
 }
 
 function checkDead() {
@@ -261,7 +267,6 @@ function checkDead() {
 }
 
 function populate() {
-
   const num_moss = document.getElementById("num_moss").value;
   const num_emono = document.getElementById("num_emono").value;
   const num_jeager = document.getElementById("num_jeager").value;
@@ -273,7 +278,11 @@ function populate() {
   document.getElementById("instructions").hidden = true;
   document.getElementById("environment").hidden = false;
 
-  ctx = document.getElementById("environment").getContext("2d");
+  const canvas = document.getElementById("environment");
+  ctx = canvas.getContext("2d");
+
+  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth;
 
   for (let i = 0; i < num_moss; i++) {
     let moss = new Moss(getRandX(), getRandY());
@@ -294,7 +303,6 @@ function populate() {
   }
 
   window.requestAnimationFrame(updateEnvironment);
-
 }
 
 function germinateDroppings() {
@@ -308,7 +316,7 @@ function germinateDroppings() {
         // TODO: Add Musk here
         let moss = new Moss(drop.x, drop.y);
         moss.moveRate = 5;
-        setNewPos.call(moss);
+        setNewPos(moss);
         mossCollection.push(moss);
         moss.birth();
       }
@@ -318,7 +326,6 @@ function germinateDroppings() {
 }
 
 function updateEnvironment() {
-
   years += 10;
 
   let str = checkDead();
@@ -336,6 +343,4 @@ function updateEnvironment() {
   germinateDroppings();
 
   window.requestAnimationFrame(updateEnvironment);
-
 }
-
