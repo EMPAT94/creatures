@@ -281,8 +281,8 @@ function populate() {
   const canvas = document.getElementById("environment");
   ctx = canvas.getContext("2d");
 
-  canvas.height = window.innerHeight;
-  canvas.width = window.innerWidth;
+  canvas.height = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
+  canvas.width = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
 
   for (let i = 0; i < num_moss; i++) {
     let moss = new Moss(getRandX(), getRandY());
