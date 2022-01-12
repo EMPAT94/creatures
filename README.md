@@ -1,21 +1,30 @@
-# CREATURES
+<br />
+<h1 align="center">Creatures</h1>
+<p align="center"> Gamified simulation of an environment with different creatures and their surroundings. Make it sustainable to win!</p>
+<br />
 
-## A simulation of an environment where different creatures interact with the surroundings and each other
+## Intro
 
-### Aim of this  is to create a sustainable environment
+When you load up the page, you are greeted with a bunch of input boxes (along with some exposition).
+
+The values you enter in these inputs determine the initial state of the simulation.
+
+The simulation consists of an [environment](##Environment), your aim is to make is sustainable. If it survives for 20,000 years, you win!
+
+Check it out at : [priteshtupe.com/creatures](https://www.priteshtupe.com/creatures)
 
 ## Environment
 
-1. Environment is made up of Plants (Moss - green, Musk - olive) and Creatures (Jeagers - red, Emono - blue)
-2. Jeagers Feed on Emonos, Emonos Feed on Plants, Plants Grow on Creatures' droppings
+1. Environment is made up of specific Plants (Moss - green, Musk - olive) and Creatures (Wolves - red, Sheep - blue).
+
+2. Wolves feed on Sheep, Sheep feed on Plants, Plants grows on Creatures' droppings.
+
 3. Musk grows only where there is a high density of droppings.
-4. Upon reaching a certain Size, Creatures/Plants Reproduce
-5. All Creatures and Plants Evolve
-6. Creatures will die if not fed for certain amount of time
-7. Creatures/Plants will die when they get old
 
-## Rules
+4. Upon reaching a certain Size, Creatures reproduce.
 
-1. You get to set the initial state of the Environment, which includes number of Moss and Creatures
-2. You may speed up the timeline or chose to watch as your Environment changes
-3. You will win if your Environment is sustainable, i.e. your Creatures are alive even after 10^5 years
+5. All Creatures and Plants evolve.
+
+6. Creatures will die if not fed for certain amount of time.
+
+7. Creatures/Plants will die when they get old.
