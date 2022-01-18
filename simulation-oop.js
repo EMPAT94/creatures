@@ -1,4 +1,4 @@
-/* globals */
+/* This is an Object Oriented Approach to creating an simulation */
 
 let ctx;
 let years = 0;
@@ -10,6 +10,7 @@ let droppingCollections = [];
 
 let CANVAS_WIDTH = window.innerWidth;
 let CANVAS_HEIGHT = window.innerHeight;
+
 
 const getRandX = () => Math.floor(Math.random() * CANVAS_WIDTH);
 const getRandY = () => Math.floor(Math.random() * CANVAS_HEIGHT);
@@ -98,8 +99,9 @@ class Being {
 
   clear() {
     ctx.fillStyle = this.deadColor;
+    ctx.strokeStyle = this.deadColor;
     ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, true);
+    ctx.arc(this.x, this.y, this.size + 1, 0, Math.PI * 2, true);
     ctx.fill();
   }
 
@@ -168,7 +170,7 @@ class Moss extends Plant {
       size: 0.1,
       growthRate: 0.08,
       aliveColor: "green",
-      deadColor: "black",
+      deadColor: "white",
       maxSize: 10,
     });
   }
@@ -183,7 +185,7 @@ class Emono extends Creature {
       growthRate: 0.05,
       lifeLeft: 100,
       aliveColor: "blue",
-      deadColor: "black",
+      deadColor: "white",
       moveRate: 5,
       food: mossCollection,
       maxSize: 5,
@@ -211,7 +213,7 @@ class Jeager extends Creature {
       growthRate: 0.03,
       lifeLeft: 250,
       aliveColor: "red",
-      deadColor: "black",
+      deadColor: "white",
       moveRate: 3,
       food: emonoCollection,
       maxSize: 8,
@@ -275,7 +277,7 @@ function populate() {
     return alert("Number must be less than 500");
   }
 
-  document.getElementById("instructions").hidden = true;
+  document.getElementById("container").hidden = true;
   document.getElementById("environment").hidden = false;
 
   const canvas = document.getElementById("environment");

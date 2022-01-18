@@ -3,107 +3,62 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1 maximum-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1 maximum-scale=1"
+    />
+    <meta name="theme-color" content="#ffffff" />
+
     <link rel="canonical" href="https://www.priteshtupe.com/creatures" />
-    <meta name="theme-color" content="#000000" />
-    <title> Pritesh Tupe | Creatures </title>
+    <link rel="stylesheet" href="./style.css" />
+
+    <title>Pritesh Tupe | Creatures</title>
   </head>
 
   <body>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-      }
-
-      html,
-      body {
-        width: 100%;
-        height: 100%;
-        background-color: black;
-        color: white;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      }
-
-      div#instructions {
-        position: "absolute";
-        max-width: 100%;
-        max-height: 100%;
-        padding: 2% 5%;
-        line-height: 1.5;
-        letter-spacing: 3px;
-      }
-
-      canvas#environment {
-        display: block;
-      }
-
-      input {
-        border-radius: 5px;
-        padding: 10px;
-        border: 1px solid grey;
-      }
-
-      button {
-        padding: 15px;
-        width: 200px;
-        background-color: black;
-        color: green;
-        border-color: white;
-        border-radius: 5px;
-      }
-
-      button:hover {
-        background-color: green;
-        color: white;
-      }
-    </style>
-
-    <div id="instructions">
-      <h1>Creatures</h1>
-
+    <div id="container">
+      <br />
+      <h1 align="center">Creatures</h1>
       <h3>
-        A simulation where different creatures interact with the surroundings
-        and each other
+        Gamified simulation of an environment with different creatures and their
+        surroundings. Make it sustainable to win!
       </h3>
 
-      <h2>Environment</h2>
+      <h2>Intro:</h2>
 
-      <ul>
-        <li>
-          Environment is made up of Plants (<span style="color: greenyellow"
-            >Moss</span
-          >, <span style="color: olivedrab">Musk</span>) and Creatures (<span
-            style="color: red"
-            >Jeager</span
-          >, <span style="color: blue">Emono</span>)
-        </li>
-        <li>
-          Jeagers feed on Emonos, Emonos feed on Plants, Plants germinate in
-          Creatures' droppings
-        </li>
-        <li>
-          Musk is extremely nutritive but grows only where there is a high
-          density of droppings
-        </li>
-        <li>Upon reaching a certain size, Creatures reproduce</li>
-        <li>All Creatures and Plants evolve</li>
-        <li>Creatures will die if not fed for certain amount of time</li>
-        <li>Creatures will die when they get old</li>
-      </ul>
+      When you load up the page, you are greeted with a bunch of input boxes
+      (along with some exposition). The values you enter in these inputs
+      determine the initial state of the simulation. The simulation consists of
+      an environment, your aim is to make is sustainable. If it survives for
+      20,000 years, you win!
 
-      <h2>Objective</h2>
-
-      <h3>
-        To create a sustainable pace of evolution given a configurable initial
-        state - you win if your creatures survive over 20,000 years
-      </h3>
-
-      <h2>Instructions</h2>
+      <h2>Environment:</h2>
 
       <ol>
         <li>
-          Enter initial number of Mosses -
+          Environment is made up of specific Plants (Moss - green, Musk - olive)
+          and Creatures (Wolves - red, Sheep - blue).
+        </li>
+
+        <li>
+          Wolves feed on Sheep, Sheep feed on Plants, Plants grows on Creatures'
+          droppings.
+        </li>
+
+        <li>Musk grows only where there is a high density of droppings.</li>
+
+        <li>Upon reaching a certain Size, Creatures reproduce.</li>
+
+        <li>All Creatures and Plants evolve.</li>
+        <li>Creatures will die if not fed for certain amount of time.</li>
+
+        <li>Creatures/Plants will die when they get old.</li>
+      </ol>
+
+      <h2>Set the stage:</h2>
+      <ol>
+        <li>
+          Enter initial number of Moss -
           <input id="num_moss" type="number" max="500" />
         </li>
         <li>
@@ -120,6 +75,6 @@
 
     <canvas id="environment"></canvas>
 
-    <script type="text/javascript" src="./simulation.js"></script>
+    <script type="text/javascript" src="./simulation-oop.js"></script>
   </body>
 </html>

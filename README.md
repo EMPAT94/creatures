@@ -28,3 +28,26 @@ Check it out at : [priteshtupe.com/creatures](https://www.priteshtupe.com/creatu
 6. Creatures will die if not fed for certain amount of time.
 
 7. Creatures/Plants will die when they get old.
+
+## Running locally
+
+```sh
+
+# Clone the repo
+
+# cd into dir
+
+# Assuming python 3
+python -m http.server
+
+```
+
+## Running in docker
+
+```sh
+
+docker build -t creatures-site .
+
+docker run -p 8000:80 creatures-site
+
+```
