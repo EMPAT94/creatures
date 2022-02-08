@@ -8,4 +8,6 @@ WORKDIR /usr/share/nginx/html
 RUN rm -rf ./*
 
 # Copy static assets over
-COPY * /
+COPY ./index.html /
+COPY ./simulation-oop.js /
+COPY ./style.css /
