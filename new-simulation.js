@@ -1,15 +1,163 @@
 let canvas, ctx;
 
+const getRandX = () => Math.floor(Math.random() * window.innerWidth);
+const getRandY = () => Math.floor(Math.random() * window.innerHeight);
+
 let particles = [
   {
-    ox: 0,
-    oy: 0,
-    x: 0,
-    y: 0,
-    s: 1,
-    c: "red",
-    staggerY: 100,
+    state: {
+      color: "green",
+      x: getRandX(), // Current x
+      y: getRandY(),
+      nx: null, // Next x
+      ny: null,
+      angle: null, // Which direction does it favor?
+    },
+    path: [],
+    range: 0, // How far can it see?
   },
+  {
+    state: {
+      speed: 2,
+      color: "yellow",
+      x: getRandX(),
+      y: getRandY(),
+      angle: null, // Which direction does it favor?
+    },
+    path: [],
+    range: 100, // How far can it see?
+  },
+  {
+    state: {
+      speed: 2,
+      color: "yellow",
+      x: getRandX(),
+      y: getRandY(),
+      angle: null, // Which direction does it favor?
+    },
+    path: [],
+    range: 100, // How far can it see?
+  },
+  {
+    state: {
+      speed: 2,
+      color: "yellow",
+      x: getRandX(),
+      y: getRandY(),
+      angle: null, // Which direction does it favor?
+    },
+    path: [],
+    range: 100, // How far can it see?
+  },
+  {
+    state: {
+      speed: 2,
+      color: "yellow",
+      x: getRandX(),
+      y: getRandY(),
+      angle: null, // Which direction does it favor?
+    },
+    path: [],
+    range: 100, // How far can it see?
+  },
+  {
+    state: {
+      speed: 2,
+      color: "yellow",
+      x: getRandX(),
+      y: getRandY(),
+      angle: null, // Which direction does it favor?
+    },
+    path: [],
+    range: 100, // How far can it see?
+  },
+  {
+    state: {
+      speed: 2,
+      color: "yellow",
+      x: getRandX(),
+      y: getRandY(),
+      angle: null, // Which direction does it favor?
+    },
+    path: [],
+    range: 100, // How far can it see?
+  },
+  {
+    state: {
+      speed: 2,
+      color: "yellow",
+      x: getRandX(),
+      y: getRandY(),
+      angle: null, // Which direction does it favor?
+    },
+    path: [],
+    range: 100, // How far can it see?
+  },
+  {
+    state: {
+      speed: 2,
+      color: "yellow",
+      x: getRandX(),
+      y: getRandY(),
+      angle: null, // Which direction does it favor?
+    },
+    path: [],
+    range: 100, // How far can it see?
+  },
+  {
+    state: {
+      speed: 2,
+      color: "yellow",
+      x: 0,
+      y: 0,
+      angle: null, // Which direction does it favor?
+    },
+    path: [],
+    range: 100, // How far can it see?
+  },
+  {
+    state: {
+      speed: 2,
+      color: "yellow",
+      x: 0,
+      y: 0,
+      angle: null, // Which direction does it favor?
+    },
+    path: [],
+    range: 100, // How far can it see?
+  },
+  {
+    state: {
+      speed: 2,
+      color: "yellow",
+      x: 0,
+      y: 0,
+      angle: null, // Which direction does it favor?
+    },
+    path: [],
+    range: 100, // How far can it see?
+  },
+  {
+    state: {
+      speed: 3,
+      color: "slateblue",
+      x: 0,
+      y: 0,
+      angle: null, // Which direction does it favor?
+    },
+    path: [],
+    range: 200, // How far can it see?
+  },
+  // {
+  //   state: {
+  //     speed: 4,
+  //     color: "red",
+  //     x: 0,
+  //     y: 0,
+  //   },
+  //   path: [],
+  //   range: 5, // How far can it see?
+  // },
 ];
 
 function main() {
@@ -21,7 +169,10 @@ function main() {
 
 function animationFrame() {
   render();
+
+  // setTimeout(() => {
   window.requestAnimationFrame(animationFrame);
+  // }, 100);
 }
 
 function render() {
@@ -43,20 +194,15 @@ function clearCanvas() {
 }
 
 function moveParticles() {
-  const x = 900,
-    y = 1010;
   particles.forEach(function (p) {
-    const { distance, angle } = getDist(p.ox, p.oy, x, y);
-
-    if (p.x >= x && p.y >= y) return;
-
-    p.x += (distance * Math.cos(angle)) / (p.s * window.innerWidth);
-
-    if (p.staggerY) {
-      const { distance: d } = getDist(p.ox, p.oy, x, y);
-      p.y += (staggeredDist * Math.sin(angle)) / (p.s * window.innerHeight);
-    } else {
-      p.y += (distance * Math.sin(angle)) / (p.s * window.innerHeight);
+    // If a particle has no heading
+    if (p.path.length === 0) {
+      getRandomEndPositionInRange(p);
+      // Find a random destination
+      const start = [p.state.x, p.state.y];
+      const end = [p.state.nx, p.state.ny];
+      // Calculate path
+      p.path = getCurvedPath(start, end);
     }
   });
 }
@@ -65,41 +211,87 @@ function renderParticles() {
   particles.forEach(function (p) {
     ctx.save();
     ctx.beginPath();
-    ctx.translate(p.x, p.y);
+    const [x, y] = p.path.shift();
+    p.state.x = x;
+    p.state.y = y;
+    ctx.translate(p.state.x, p.state.y);
     ctx.arc(0, 0, 10, 0, 2 * Math.PI);
-    ctx.fillStyle = p.c;
+    ctx.fillStyle = p.state.color;
     ctx.fill();
     ctx.stroke();
     ctx.restore();
   });
 }
 
-function getDist(x1, y1, x2, y2) {
-  const x = x2 - x1,
-    y = y2 - y1;
+function getRandomEndPositionInRange(p) {
+  let {
+    state: { x, y, angle },
+    range,
+  } = p;
 
-  return {
-    distance: Math.sqrt(x * x + y * y),
-    angle: Math.atan2(y, x),
-  };
-}
-
-const getRandX = () => Math.floor(Math.random() * window.innerWidth);
-const getRandY = () => Math.floor(Math.random() * window.innerHeight);
-
-function getCurvedPath(start, end) {
-  const STEP = 0.05;
-  const P1 = [100, 100]; // TODO
-
-  let path = [start];
-
-  for (let t = STEP; t < 1; t += STEP) {
-    path.push([
-      bezierCurve(start[0], end[0], t, P1[0]),
-      bezierCurve(start[1], end[1], t, P1[1]),
-    ]);
+  if (!angle) {
+    p.state.angle = Math.random() * 360 * (Math.PI / 180);
+  } else {
+    p.state.angle =
+      angle + (Chance.Equal ? -1 : 1) * Math.random() * 30 * (Math.PI / 180);
+    angle = p.state.angle;
   }
 
+  let nx = x + range * Math.cos(angle);
+  if (nx < 0) {
+    nx = p.range;
+    p.state.angle = Math.random() * 360 * (Math.PI / 180);
+  }
+
+  if (nx > window.innerWidth) {
+    nx = window.innerWidth - p.range;
+    p.state.angle = Math.random() * 360 * (Math.PI / 180);
+  }
+
+  let ny = y + range * Math.sin(angle);
+  if (ny < 0) {
+    ny = p.range;
+    p.state.angle = Math.random() * 360 * (Math.PI / 180);
+  }
+  if (ny > window.innerHeight) {
+    ny = window.innerHeight - p.range;
+    p.state.angle = Math.random() * 360 * (Math.PI / 180);
+  }
+
+  p.state.nx = nx;
+  p.state.ny = ny;
+}
+
+class Chance {
+  static get Rare() {
+    return Math.random() <= 0.2;
+  }
+  static get Equal() {
+    return Math.random() <= 0.4;
+  }
+  static get Frequent() {
+    return Math.random() <= 0.7;
+  }
+}
+
+function getCurvedPath(start, end, step = 0.01) {
+  // Calculate control point
+  // It is always in the middle of and slightly "above" or "below" line
+  // const theta = (Chance.Equal ? -1 : 1) * 45 * (Math.PI / 180);
+  // const { distance, angle } = getDist(start, end);
+
+  // const P1 = [
+  //   start[0] + (distance / 2),
+  //   start[1] + (distance / 2)
+  // ];
+
+  let path = [start];
+  for (let t = 0; t < 1; t += step) {
+    path.push([
+      bezierCurve(start[0], end[0], t), //, P1[0]),
+      bezierCurve(start[1], end[1], t), //, P1[1]),
+    ]);
+  }
   path.push(end);
   return path;
 }
@@ -112,4 +304,14 @@ function bezierCurve(start, end, t, ...controls) {
     );
   }
   return (1 - t) * start + t * end;
+}
+
+function getDist(x1, y1, x2, y2) {
+  const x = x2 - x1,
+    y = y2 - y1;
+
+  return {
+    distance: Math.sqrt(x * x + y * y),
+    angle: Math.atan2(y, x),
+  };
 }
