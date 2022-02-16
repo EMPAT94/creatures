@@ -1,74 +1,46 @@
 let canvas, ctx;
 
-const getRandX = () => Math.floor(Math.random() * window.innerWidth);
-const getRandY = () => Math.floor(Math.random() * window.innerHeight);
-
-let particles = [
-  {
-    color: "red",
-    pos: getRandomPoint(),
-    size: 10,
-    angle: null,
-    path: [],
-    range: 500,
-  },
-  {
-    color: "blue",
-    pos: getRandomPoint(),
-    size: 10,
-    angle: null,
-    path: [],
-    range: 300,
-  },
-  {
-    color: "green",
-    pos: getRandomPoint(),
-    size: 10,
-    angle: null,
-    path: [],
-    range: 10,
-  },
-  {
-    color: "yellow",
-    pos: getRandomPoint(),
-    size: 10,
-    angle: null,
-    path: [],
-    range: 50,
-  },
-];
+let actors = [];
+let hour = 0;
 
 function main() {
+  // Set the stage
   document.getElementById("btn").style.display = "none";
   canvas = document.getElementById("environment");
   ctx = canvas.getContext("2d");
+
+  // Initialize actors
+  for (let i = 0; i < 5; i++) {
+    actors.push(new Grass());
+  }
+
+  for (let i = 0; i < 1; i++) {
+    actors.push(new Lamb());
+  }
+
+  for (let i = 0; i < 1; i++) {
+    actors.push(new Wolf());
+  }
+
+  // Aaand action
   window.requestAnimationFrame(animationFrame);
 }
 
 function animationFrame() {
-  render();
+  hour += 1;
+  render(actors);
   // setTimeout(() => {
   window.requestAnimationFrame(animationFrame);
   // }, 100);
 }
 
-function render() {
-  setCanvasSize(ctx);
+function render(actors = []) {
   clearCanvas(ctx);
-  moveParticles();
+  simulate(actors);
 }
 
-function moveParticles() {
-  particles.forEach(function (p) {
-    // If a particle has no heading, make new path
-    if (p.path.length === 0) {
-      const { path, angle } = getNewPath(p);
-      p.path = path;
-      p.angle = angle;
-    }
-
-    // Update new path position on canvas
-    p.pos = p.path.shift();
-    renderParticle(ctx, p);
+function simulate(actors) {
+  actors.forEach(function (a) {
+    a.heading().move();
   });
 }

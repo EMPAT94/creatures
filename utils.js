@@ -10,25 +10,9 @@ class Chance {
   }
 }
 
-function getNewPath({ pos, angle, range }) {
-  // Calculate control point
-  // It is always in the middle of and slightly "above" or "below" line
-  // const theta = (Chance.Equal ? -1 : 1) * 45 * (Math.PI / 180);
-  // const { distance, angle } = getDist(start, end);
-
-  // const P1 = [
-  //   start[0] + (distance / 2),
-  //   start[1] + (distance / 2)
-  // ];
-
+function getNewPath({ pos, endPos }) {
   const STEP = 0.01;
   const START = pos;
-
-  const { endPos, angle: newAngle } = getRandomEndPositionInRange({
-    pos,
-    angle,
-    range,
-  });
   const END = endPos;
 
   const path = [START];
@@ -40,7 +24,7 @@ function getNewPath({ pos, angle, range }) {
   }
   path.push(END);
 
-  return { path, angle: newAngle };
+  return { path };
 
   function bezierCurve(start, end, t, ...controls) {
     if (controls.length > 0) {
@@ -53,7 +37,7 @@ function getNewPath({ pos, angle, range }) {
   }
 }
 
-function getDistAndAngBwPoints([x1, y1], [x2, y2]) {
+function getDistAndAngBtwnPoints([x1, y1], [x2, y2]) {
   const x = x2 - x1,
     y = y2 - y1;
 
@@ -63,7 +47,7 @@ function getDistAndAngBwPoints([x1, y1], [x2, y2]) {
   };
 }
 
-function getRandomEndPositionInRange({
+function getRandomEndPos({
   pos: [x, y],
   angle = Math.random() * 360 * (Math.PI / 180),
   range,
@@ -74,7 +58,7 @@ function getRandomEndPositionInRange({
 
   if (nx < 0) {
     nx = range;
-    angle = Math.random() * 360 * (Math.PI / 180);
+    angle = Math.random() * 360 * (Math.PI / 180); // TODO Change angle
   } else if (nx > window.innerWidth) {
     nx = window.innerWidth - range;
     angle = Math.random() * 360 * (Math.PI / 180);
@@ -98,4 +82,27 @@ function getRandomPoint() {
     Math.floor(Math.random() * window.innerWidth),
     Math.floor(Math.random() * window.innerHeight),
   ];
+}
+
+function clearCanvas(ctx) {
+  ctx.canvas.width = window.innerWidth;
+  ctx.canvas.height = window.innerHeight;
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+}
+
+function renderParticle(ctx, { pos, color, size }) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.translate(pos[0], pos[1]);
+  ctx.arc(0, 0, size, 0, 2 * Math.PI);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+}
+
+function detectCollision(from, ...to) {
+  return "todo";
 }
