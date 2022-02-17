@@ -1,46 +1,69 @@
-let canvas, ctx;
+let canvas, ctx, panel;
 
-let actors = [];
-let hour = 0;
+const TIME_PER_RENDER = 1;
+
+let grass = [];
+let lambs = [];
+let wolves = [];
+
+let hours = 0;
 
 function main() {
   // Set the stage
-  document.getElementById("btn").style.display = "none";
   canvas = document.getElementById("environment");
   ctx = canvas.getContext("2d");
+  panel = document.getElementById("panel");
+  document.getElementById("btn").style.display = "none";
+  canvas.style.display = "block";
 
   // Initialize actors
-  for (let i = 0; i < 5; i++) {
-    actors.push(new Grass());
+  for (let i = 0; i < 100; i++) {
+    grass.push(new Grass());
+  }
+
+  for (let i = 0; i < 50; i++) {
+    lambs.push(new Lamb());
   }
 
   for (let i = 0; i < 1; i++) {
-    actors.push(new Lamb());
-  }
-
-  for (let i = 0; i < 1; i++) {
-    actors.push(new Wolf());
+    wolves.push(new Wolf());
   }
 
   // Aaand action
-  window.requestAnimationFrame(animationFrame);
+  window.requestAnimationFrame(render);
 }
 
-function animationFrame() {
-  hour += 1;
-  render(actors);
-  // setTimeout(() => {
-  window.requestAnimationFrame(animationFrame);
-  // }, 100);
-}
+function render() {
+  hours += TIME_PER_RENDER;
 
-function render(actors = []) {
+  // if (hours % (24 * 30)) {
+  //   panel.innerHTML = formatTime(hours);
+  // }
+
   clearCanvas(ctx);
-  simulate(actors);
-}
 
-function simulate(actors) {
-  actors.forEach(function (a) {
-    a.heading().move();
+  grass.forEach((a) => {
+    if (a) {
+      a.mature(TIME_PER_RENDER).heading().move();
+      if (!a.isAlive) a = null;
+    }
   });
+
+  lambs.forEach((a) => {
+    if (a) {
+      a.mature(TIME_PER_RENDER).heading(grass).move();
+      if (!a.isAlive) a = null;
+    }
+  });
+
+  wolves.forEach((a) => {
+    if (a) {
+      a.mature(TIME_PER_RENDER).heading(lambs).move();
+      if (!a.isAlive) a = null;
+    }
+  });
+
+  // setTimeout(() => {
+  window.requestAnimationFrame(render);
+  // }, 1000);
 }

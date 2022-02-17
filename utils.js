@@ -92,17 +92,32 @@ function clearCanvas(ctx) {
   ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 }
 
-function renderParticle(ctx, { pos, color, size }) {
+function renderParticle(ctx, p) {
   ctx.save();
   ctx.beginPath();
-  ctx.translate(pos[0], pos[1]);
-  ctx.arc(0, 0, size, 0, 2 * Math.PI);
-  ctx.fillStyle = color;
+  ctx.translate(p.pos[0], p.pos[1]);
+  ctx.arc(0, 0, p.size, 0, 2 * Math.PI);
+  ctx.fillStyle = p.color;
   ctx.fill();
-  ctx.stroke();
+  // ctx.strokeStyle = p.color;
+  // ctx.stroke();
   ctx.restore();
 }
 
-function detectCollision(from, ...to) {
-  return "todo";
+function detectClosestInRange(from = {}, to = []) {
+  let closest;
+  let hasCollided = false;
+  let _minDist = Infinity;
+
+  to.forEach((p) => {
+    const dist = getDistAndAngBtwnPoints(from.pos, p.pos).distance;
+    if (dist < from.range && _minDist > dist) {
+      closest = p;
+      _minDist = dist;
+    }
+  });
+
+  if (_minDist < from.size) hasCollided = true;
+
+  return { closest, hasCollided };
 }

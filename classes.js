@@ -5,31 +5,30 @@ class Particle {
   isAlive = true;
 
   constructor(o) {
-    this.maxSize = o.maxSize;
-    this.color = o.color;
     this.size = o.size;
     this.range = o.range;
+    this.maxSize = o.maxSize;
+    this.maxAge = o.maxAge || Infinity;
+
+    this.color = o.aliveColor;
+    this.dyingColor = o.dyingColor || "grey";
+    this.deadColor = o.deadColor || "white";
   }
 
-  age(time) {
-    this.age += time;
+  mature(time) {
+    if (this.isAlive) {
+      this.age += time;
+      if (this.age > this.maxAge - 5 && this.age < this.maxAge) {
+        return this._dying();
+      } else if (this.age >= this.maxAge) {
+        return this.die();
+      }
+    }
+    return this;
   }
 
   grow(feed) {
-    this.size += feed;
-  }
-
-  heading() {
-    if (!this.path.length) {
-      if (!this.range) {
-        this.path = [this.pos];
-        return this;
-      }
-
-      ({ endPos: this.endPos, angle: this.angle } = getRandomEndPos(this));
-
-      this.path = getNewPath(this).path;
-    }
+    if (this.size < this.maxSize) this.size += feed;
     return this;
   }
 
@@ -38,42 +37,101 @@ class Particle {
       this.pos = this.path.shift();
       renderParticle(ctx, this);
     }
+    return this;
+  }
+
+  _dying() {
+    this.color = this.dyingColor;
+    return this;
   }
 
   die() {
     this.isAlive = false;
+    this.color = this.deadColor;
+    return this;
   }
 }
 
 class Grass extends Particle {
   constructor() {
-    super({ maxSize: 30, color: "lightgreen", size: 7, range: 0 });
+    super({
+      maxSize: 30,
+      aliveColor: "lightgreen",
+      size: 7,
+      range: 0,
+    });
+  }
+
+  heading() {
+    // This is required coz entire canvas is re-rendered
+    this.path = [this.pos];
+    return this;
   }
 }
 
 class Lamb extends Particle {
   constructor() {
-    super({ maxSize: 10, color: "yellow", size: 4, range: 50 });
+    super({
+      maxSize: 10,
+      maxAge: convertTime(15, "year", "hour"),
+      aliveColor: "yellow",
+      size: 4,
+      range: 30,
+    });
   }
 
-  heading() {
-    // In order of priority:
-    // 1. Run away from predators
-    // 2. Run towards feed
-    // 3. Move randomly with herd
-    return super.heading();
+  heading(food) {
+    if (!this.path.length) {
+      // In order of priority:
+      // 1. Run away from predators
+      // 2. Run towards feed
+      // 3. Move randomly with herd
+
+      const { closest, hasCollided } = detectClosestInRange(
+        this,
+        food.filter((f) => f.isAlive)
+      );
+      if (closest) {
+        this.endPos = closest.pos;
+        if (hasCollided) closest.die();
+      } else {
+        ({ endPos: this.endPos, angle: this.angle } = getRandomEndPos(this));
+      }
+      ({ path: this.path } = getNewPath(this));
+    }
+    return this;
   }
 }
 
 class Wolf extends Particle {
   constructor() {
-    super({ maxSize: 15, color: "steelblue", size: 5, range: 100 });
+    super({
+      maxSize: 15,
+      maxAge: convertTime(30, "year", "hour"),
+      aliveColor: "steelblue",
+      size: 5,
+      range: 75,
+    });
   }
 
-  heading() {
-    // In order of priority:
-    // 1. Run towards feed
-    // 2. Move randomly away from others wolves
-    return super.heading();
+  heading(food) {
+    if (!this.path.length) {
+      // In order of priority:
+      // 1. Run towards closest food
+      // 2. Move randomly
+
+      const { closest, hasCollided } = detectClosestInRange(
+        this,
+        food.filter((f) => f.isAlive)
+      );
+      if (closest) {
+        this.endPos = closest.pos;
+        if (hasCollided) closest.die();
+      } else {
+        ({ endPos: this.endPos, angle: this.angle } = getRandomEndPos(this));
+      }
+      ({ path: this.path } = getNewPath(this));
+    }
+    return this;
   }
 }
