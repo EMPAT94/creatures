@@ -17,11 +17,11 @@ function main() {
   canvas.style.display = "block";
 
   // Initialize actors
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 300; i++) {
     grass.push(new Grass());
   }
 
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 100; i++) {
     lambs.push(new Lamb());
   }
 
@@ -36,8 +36,8 @@ function main() {
 function render() {
   hours += TIME_PER_RENDER;
 
-  // if (hours % (24 * 30)) {
-  //   panel.innerHTML = formatTime(hours);
+  // if (hours % (24 * 30) === 0) {
+  // panel.innerHTML = "month: " + hours / 720;
   // }
 
   clearCanvas(ctx);
@@ -51,7 +51,7 @@ function render() {
 
   lambs.forEach((a) => {
     if (a) {
-      a.mature(TIME_PER_RENDER).heading(grass).move();
+      a.mature(TIME_PER_RENDER).heading(grass, wolves).move();
       if (!a.isAlive) a = null;
     }
   });
@@ -65,5 +65,5 @@ function render() {
 
   // setTimeout(() => {
   window.requestAnimationFrame(render);
-  // }, 1000);
+  // }, 100);
 }

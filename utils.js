@@ -10,13 +10,21 @@ class Chance {
   }
 }
 
-function getNewPath({ pos, endPos }) {
-  const STEP = 0.01;
+function getNewPath({ pos, endPos, range }) {
   const START = pos;
   const END = endPos;
+  const DIST = Math.round(getDistAndAngBtwnPoints(START, END).distance);
+
+  let step = 0.01;
+
+  // If the target is slower than self
+  if (DIST < range) {
+    // increase the step correspondingly, do not slow down
+    step = (step * range) / DIST;
+  }
 
   const path = [START];
-  for (let t = 0; t < 1; t += STEP) {
+  for (let t = 0; t < 1; t += step) {
     path.push([
       bezierCurve(START[0], END[0], t), //, P1[0]),
       bezierCurve(START[1], END[1], t), //, P1[1]),
@@ -51,7 +59,11 @@ function getRandomEndPos({
   pos: [x, y],
   angle = Math.random() * 360 * (Math.PI / 180),
   range,
+  boostRange,
 }) {
+
+  if (boostRange) range += range * 0.7;
+
   angle += (Chance.Equal ? -1 : 1) * Math.random() * 30 * (Math.PI / 180);
 
   let nx = x + range * Math.cos(angle);
@@ -120,4 +132,8 @@ function detectClosestInRange(from = {}, to = []) {
   if (_minDist < from.size) hasCollided = true;
 
   return { closest, hasCollided };
+}
+
+function yearsToHours(y) {
+  return y * 365 * 24;
 }

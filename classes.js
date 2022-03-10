@@ -33,7 +33,7 @@ class Particle {
   }
 
   move() {
-    if (this.path.length) {
+    if (this.isAlive && this.path.length) {
       this.pos = this.path.shift();
       renderParticle(ctx, this);
     }
@@ -73,30 +73,41 @@ class Lamb extends Particle {
   constructor() {
     super({
       maxSize: 10,
-      maxAge: convertTime(15, "year", "hour"),
+      maxAge: yearsToHours(15),
       aliveColor: "yellow",
       size: 4,
       range: 30,
     });
   }
 
-  heading(food) {
+  heading(food, predators) {
     if (!this.path.length) {
       // In order of priority:
       // 1. Run away from predators
       // 2. Run towards feed
       // 3. Move randomly with herd
 
-      const { closest, hasCollided } = detectClosestInRange(
+      const { closest: closestPredator } = detectClosestInRange(
         this,
-        food.filter((f) => f.isAlive)
+        predators.filter((p) => p.isAlive)
       );
-      if (closest) {
-        this.endPos = closest.pos;
-        if (hasCollided) closest.die();
+
+      const { closest: closestfood, hasCollided: hasEaten } =
+        detectClosestInRange(
+          this,
+          food.filter((f) => f.isAlive)
+        );
+
+      if (closestPredator) {
+        this.boostRange = true;
+        ({ endPos: this.endPos, angle: this.angle } = getRandomEndPos(this));
+      } else if (closestfood) {
+        this.endPos = closestfood.pos;
+        if (hasEaten) closestfood.die();
       } else {
         ({ endPos: this.endPos, angle: this.angle } = getRandomEndPos(this));
       }
+      this.boostRange = false;
       ({ path: this.path } = getNewPath(this));
     }
     return this;
@@ -107,7 +118,7 @@ class Wolf extends Particle {
   constructor() {
     super({
       maxSize: 15,
-      maxAge: convertTime(30, "year", "hour"),
+      maxAge: yearsToHours(30),
       aliveColor: "steelblue",
       size: 5,
       range: 75,
