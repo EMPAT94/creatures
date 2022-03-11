@@ -1,4 +1,4 @@
-class Particle {
+class Being {
   path = [];
   pos = getRandomPoint();
   age = 0;
@@ -13,14 +13,40 @@ class Particle {
     this.color = o.aliveColor;
     this.dyingColor = o.dyingColor || "grey";
     this.deadColor = o.deadColor || "white";
+
+    if (o.pos) this.pos = o.pos;
   }
 
+  die() {
+    this.isAlive = false;
+    this.color = this.deadColor;
+    return this;
+  }
+}
+
+class Flora extends Being {
   mature(time) {
-    if (this.isAlive) {
+    this.age += time;
+    if (this.size < this.maxSize) this.size += time / 10;
+    return this;
+  }
+
+  show() {
+    renderParticle(ctx, this);
+    return this;
+  }
+}
+
+class Fauna extends Being {
+  mature(time) {
+    if (this.isalive) {
       this.age += time;
-      if (this.age > this.maxAge - 5 && this.age < this.maxAge) {
+      if (
+        this.age > this.maxage - this.maxage * 0.2 &&
+        this.age < this.maxage
+      ) {
         return this._dying();
-      } else if (this.age >= this.maxAge) {
+      } else if (this.age >= this.maxage) {
         return this.die();
       }
     }
@@ -32,9 +58,52 @@ class Particle {
     return this;
   }
 
+  heading(food, predators) {
+    if (!this.path.length) {
+      // In order of priority:
+      // 1. Run away from predators
+      // 2. Run towards feed
+      // 3. Move randomly with herd
+      this.boostRange = false;
+
+      const { closest: closestPredator } = detectClosestInRange(
+        this,
+        predators.filter((p) => p.isAlive)
+      );
+
+      if (closestPredator) {
+        this.boostRange = true;
+        ({ endPos: this.endPos, angle: this.angle } = getRandomEndPos(this));
+        ({ path: this.path } = getNewPath(this));
+        return this;
+      }
+
+      const { closest: closestfood, hasCollided: hasEaten } =
+        detectClosestInRange(
+          this,
+          food.filter((f) => f.isAlive)
+        );
+
+      if (closestfood) {
+        this.endPos = closestfood.pos;
+        ({ path: this.path } = getNewPath(this));
+        if (hasEaten) {
+          closestfood.die();
+          this.hasEaten = true;
+        }
+        return this;
+      }
+
+      ({ endPos: this.endPos, angle: this.angle } = getRandomEndPos(this));
+      ({ path: this.path } = getNewPath(this));
+    }
+
+    return this;
+  }
+
   move() {
     if (this.isAlive && this.path.length) {
-      this.pos = this.path.shift();
+      this.pos = this.path.pop();
       renderParticle(ctx, this);
     }
     return this;
@@ -44,105 +113,55 @@ class Particle {
     this.color = this.dyingColor;
     return this;
   }
-
-  die() {
-    this.isAlive = false;
-    this.color = this.deadColor;
-    return this;
-  }
 }
 
-class Grass extends Particle {
+class Seed extends Flora {
   constructor() {
     super({
-      maxSize: 30,
-      aliveColor: "lightgreen",
-      size: 7,
+      maxAge: 24 * 30,
+      aliveColor: "brown",
+      size: 5,
       range: 0,
     });
   }
 
-  heading() {
-    // This is required coz entire canvas is re-rendered
-    this.path = [this.pos];
-    return this;
+  canGerminate() {
+    return this.age >= this.maxAge;
   }
 }
 
-class Lamb extends Particle {
+class Grass extends Flora {
+  constructor(o) {
+    super({
+      maxSize: 7,
+      aliveColor: "lightgreen",
+      size: 2,
+      range: 0,
+      ...o,
+    });
+  }
+}
+
+class Lamb extends Fauna {
   constructor() {
     super({
       maxSize: 10,
       maxAge: yearsToHours(15),
-      aliveColor: "yellow",
-      size: 4,
+      aliveColor: "orange",
+      size: 3,
       range: 30,
     });
   }
-
-  heading(food, predators) {
-    if (!this.path.length) {
-      // In order of priority:
-      // 1. Run away from predators
-      // 2. Run towards feed
-      // 3. Move randomly with herd
-
-      const { closest: closestPredator } = detectClosestInRange(
-        this,
-        predators.filter((p) => p.isAlive)
-      );
-
-      const { closest: closestfood, hasCollided: hasEaten } =
-        detectClosestInRange(
-          this,
-          food.filter((f) => f.isAlive)
-        );
-
-      if (closestPredator) {
-        this.boostRange = true;
-        ({ endPos: this.endPos, angle: this.angle } = getRandomEndPos(this));
-      } else if (closestfood) {
-        this.endPos = closestfood.pos;
-        if (hasEaten) closestfood.die();
-      } else {
-        ({ endPos: this.endPos, angle: this.angle } = getRandomEndPos(this));
-      }
-      this.boostRange = false;
-      ({ path: this.path } = getNewPath(this));
-    }
-    return this;
-  }
 }
 
-class Wolf extends Particle {
+class Wolf extends Fauna {
   constructor() {
     super({
-      maxSize: 15,
+      maxSize: 13,
       maxAge: yearsToHours(30),
       aliveColor: "steelblue",
-      size: 5,
-      range: 75,
+      size: 4,
+      range: 50,
     });
-  }
-
-  heading(food) {
-    if (!this.path.length) {
-      // In order of priority:
-      // 1. Run towards closest food
-      // 2. Move randomly
-
-      const { closest, hasCollided } = detectClosestInRange(
-        this,
-        food.filter((f) => f.isAlive)
-      );
-      if (closest) {
-        this.endPos = closest.pos;
-        if (hasCollided) closest.die();
-      } else {
-        ({ endPos: this.endPos, angle: this.angle } = getRandomEndPos(this));
-      }
-      ({ path: this.path } = getNewPath(this));
-    }
-    return this;
   }
 }

@@ -32,7 +32,7 @@ function getNewPath({ pos, endPos, range }) {
   }
   path.push(END);
 
-  return { path };
+  return { path: path.reverse() };
 
   function bezierCurve(start, end, t, ...controls) {
     if (controls.length > 0) {
@@ -62,7 +62,7 @@ function getRandomEndPos({
   boostRange,
 }) {
 
-  if (boostRange) range += range * 0.7;
+  if (boostRange) range += range * 0.3;
 
   angle += (Chance.Equal ? -1 : 1) * Math.random() * 30 * (Math.PI / 180);
 
